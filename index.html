@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1vs1 Chempionat</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            padding-bottom: 40px;
+        }
+
+        header {
+            background-color: #1e293b;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://via.placeholder.com/1200x400') center/cover;
+            color: white;
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            color: #0f172a;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-delete {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-delete:hover {
+            background-color: #dc2626;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background-color: #f8fafc;
+        }
+
+        .tg-link {
+            color: #0088cc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .tg-link:hover {
+            text-decoration: underline;
+        }
+
+        .match-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .match-card input {
+            width: 60px;
+            padding: 5px;
+            text-align: center;
+            margin: 0 5px;
+        }
+
+        .admin-panel {
+            background-color: #fff7ed;
+            border: 1px solid #ffedd5;
+        }
+
+        .winner {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .loser {
+            color: #dc2626;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .limit-info {
+            font-weight: bold;
+            color: #0284c7;
+            margin-bottom: 10px;
+            display: block;
+        }
+    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+
+<body>
+
+    <header>
+        <h2>1vs1 Tournament</h2>
+        <button onclick="toggleAdmin()" id="adminBtn">Admin Kirish</button>
+    </header>
+
+    <div class="hero">
+        <h1>Milliy Chempionat 2026</h1>
+        <p>G'olib bo'lish uchun ro'yxatdan o'ting va kuchingizni ko'rsating!</p>
+    </div>
+
+    <div class="container">
+        <!-- Ro'yxatdan o'tish formasi -->
+        <div class="card" id="registerCard">
+            <h2>Ishtirok etish</h2>
+            <span class="limit-info" id="playerCountInfo">Ro'yxatdan o'tganlar: 0 / 32</span>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="playerName">Ismingiz yoki Taxallusingiz:</label>
+                    <input type="text" id="playerName" required placeholder="Masalan: Bekzod">
+                </div>
+                <div class="form-group">
+                    <label for="telegramHandle">Telegram Username:</label>
+                    <input type="text" id="telegramHandle" required placeholder="username (masalan: storm_user)">
+                </div>
+                <button type="submit" id="submitBtn">Ro'yxatdan o'tish</button>
+            </form>
+            <p id="closedMessage" style="display:none; color: #dc2626; font-weight: bold;">Ro'yxatdan o'tish yopildi!
+                Maksimal 32 ta ishtirokchi to'plandi.</p>
+        </div>
+
+        <!-- Ishtirokchilar ro'yxati -->
+        <div class="card">
+            <h2>Ishtirokchilar</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Ism</th>
+                        <th>Telegram</th>
+                        <th class="admin-col" style="display: none;">Amal</th>
+                    </tr>
+                </thead>
+                <tbody id="playersList">
+                    <tr>
+                        <td colspan="4">Yuklanmoqda...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Admin Paneli -->
+        <div class="card admin-panel" id="adminPanel" style="display: none;">
+            <h2>Admin Boshqaruvi</h2>
+            <p style="margin-bottom: 10px; color: #c2410c;">Eslatma: Qur'a tashlanganda faqat mag'lub bo'lmaganlar
+                saralanadi.</p>
+            <button onclick="drawMatches()">Qur'a Tashlash (Keyingi bosqich)</button>
+            <div id="adminMatches" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- O'yinlar jadvali -->
+        <div class="card">
+            <h2>O'yinlar Jadvallari</h2>
+            <div id="matchesList">Hozircha o'yinlar belgilanmagan.</div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase sozlamalari
+        const firebaseConfig = {
+            databaseURL: "https://storm-chempionship-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let isAdmin = false;
+        const MAX_PLAYERS = 32;
+
+        // Qurilmaning doimiy Fingerprint kalitini shakllantirish
+        function getDeviceId() {
+            const navigatorInfo = navigator.userAgent + navigator.language + screen.width + "x" + screen.height + screen.colorDepth;
+            let hash = 0;
+            for (let i = 0; i < navigatorInfo.length; i++) {
+                const char = navigatorInfo.charCodeAt(i);
+                hash = (hash << 5) - hash + char;
+                hash |= 0;
+            }
+            return "dev_" + Math.abs(hash);
+        }
+
+        const deviceId = getDeviceId();
+
+        // Ro'yxatdan o'tish
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('playerName').value.trim();
+            let tg = document.getElementById('telegramHandle').value.trim();
+
+            if (!tg.startsWith('@')) tg = '@' + tg;
+
+            db.ref('players').once('value', (snapshot) => {
+                let currentCount = snapshot.exists() ? snapshot.numChildren() : 0;
+
+                // 32 kishilik cheklovni tekshirish
+                if (currentCount >= MAX_PLAYERS) {
+                    alert("Kechirasiz, ro'yxatdan o'tish yopildi! Maksimal 32 ta ishtirokchi ro'yxatdan o'tib bo'ldi.");
+                    return;
+                }
+
+                let deviceExists = false;
+                let tgExists = false;
+
+                if (snapshot.exists()) {
+                    snapshot.forEach((child) => {
+                        const val = child.val();
+                        if (val.deviceId === deviceId) deviceExists = true;
+                        if (val.telegram && val.telegram.toLowerCase() === tg.toLowerCase()) tgExists = true;
+                    });
+                }
+
+                if (deviceExists) {
+                    alert("Ushbu qurilmadan (telefon yoki kompyuterdan) allaqachon ro'yxatdan o'tilgan!");
+                } else if (tgExists) {
+                    alert("Ushbu Telegram username bilan kimdir ro'yxatdan o'tib bo'lgan!");
+                } else {
+                    const newPlayerRef = db.ref('players').push();
+                    newPlayerRef.set({
+                        name: name,
+                        telegram: tg,
+                        deviceId: deviceId,
+                        isEliminated: false
+                    }, (error) => {
+                        if (!error) {
+                            alert("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
+                            document.getElementById('registerForm').reset();
+                        } else {
+                            alert("Xatolik yuz berdi: " + error.message);
+                        }
+                    });
+                }
+            });
+        });
+
+        // Ishtirokchilarni ko'rsatish va sonini tekshirish
+        db.ref('players').on('value', (snapshot) => {
+            renderPlayers(snapshot);
+        });
+
+        function renderPlayers(snapshot) {
+            const playersList = document.getElementById('playersList');
+            const countInfo = document.getElementById('playerCountInfo');
+            const regForm = document.getElementById('registerForm');
+            const closedMsg = document.getElementById('closedMessage');
+
+            playersList.innerHTML = '';
+            let count = snapshot.exists() ? snapshot.numChildren() : 0;
+
+            countInfo.innerText = `Ro'yxatdan o'tganlar: ${count} / ${MAX_PLAYERS}`;
+
+            // 32 kishi to'lsa formani berkitish
+            if (count >= MAX_PLAYERS) {
+                regForm.style.display = 'none';
+                closedMsg.style.display = 'block';
+            } else {
+                regForm.style.display = 'block';
+                closedMsg.style.display = 'none';
+            }
+
+            let num = 1;
+            if (snapshot.exists()) {
+                snapshot.forEach((child) => {
+                    const key = child.key;
+                    const player = child.val();
+                    const cleanTg = player.telegram ? player.telegram.replace('@', '') : '';
+
+                    const adminBtnCell = isAdmin ? `<td class="admin-col"><button class="btn-delete" onclick="deletePlayer('${key}')">O'chirish</button></td>` : `<td class="admin-col" style="display:none;"></td>`;
+                    const statusText = player.isEliminated ? ' <span style="color:red;">(Chiqib ketgan)</span>' : '';
+
+                    playersList.innerHTML += `
+                        <tr>
+                            <td>${num++}</td>
+                            <td>${player.name}${statusText}</td>
+                            <td><a class="tg-link" href="https://t.me/${cleanTg}" target="_blank">${player.telegram}</a></td>
+                            ${adminBtnCell}
+                        </tr>
+                    `;
+                });
+            } else {
+                playersList.innerHTML = '<tr><td colspan="4">Hozircha ishtirokchilar mavjud emas</td></tr>';
+            }
+        }
+
+        // Admin rejimiga kirish
+        function toggleAdmin() {
+            if (!isAdmin) {
+                const pass = prompt("Admin parolini kiriting:");
+                if (pass === "saidakbarrty") {
+                    isAdmin = true;
+                    document.getElementById('adminPanel').style.display = 'block';
+                    document.getElementById('adminBtn').innerText = "Admin Chiqish";
+
+                    document.querySelectorAll('.admin-col').forEach(el => el.style.display = 'table-cell');
+                    db.ref('players').once('value', (snapshot) => renderPlayers(snapshot));
+
+                    alert("Admin rejimi yoqildi!");
+                } else {
+                    alert("Parol noto'g'ri!");
+                }
+            } else {
+                isAdmin = false;
+                document.getElementById('adminPanel').style.display = 'none';
+                document.getElementById('adminBtn').innerText = "Admin Kirish";
+                document.querySelectorAll('.admin-col').forEach(el => el.style.display = 'none');
+            }
+        }
+
+        // Admin: Ishtirokchini bazadan o'chirish
+        function deletePlayer(key) {
+            if (confirm("Haqiqatdan ham ushbu ishtirokchini ro'yxatdan o'chirmoqchimisiz?")) {
+                db.ref(`players/${key}`).remove()
+                    .then(() => alert("Ishtirokchi muvaffaqiyatli o'chirildi!"))
+                    .catch((error) => alert("O'chirishda xatolik: " + error.message));
+            }
+        }
+
+        // Qur'a tashlash
+        function drawMatches() {
+            db.ref('players').once('value', (snapshot) => {
+                const activePlayers = [];
+                snapshot.forEach((child) => {
+                    const p = child.val();
+                    if (!p.isEliminated) {
+                        activePlayers.push({ id: child.key, ...p });
+                    }
+                });
+
+                if (activePlayers.length < 2) {
+                    alert("Qur'a tashlash uchun kamida 2 ta faol ishtirokchi kerak!");
+                    return;
+                }
+
+                activePlayers.sort(() => Math.random() - 0.5);
+                const matches = [];
+
+                for (let i = 0; i < activePlayers.length; i += 2) {
+                    if (activePlayers[i + 1]) {
+                        matches.push({
+                            id1: activePlayers[i].id,
+                            p1: activePlayers[i].name,
+                            id2: activePlayers[i + 1].id,
+                            p2: activePlayers[i + 1].name,
+                            score1: 0,
+                            score2: 0,
+                            status: 'pending'
+                        });
+                    }
+                }
+
+                db.ref('matches').set(matches);
+                alert("Yangi bosqich uchun qur'a muvaffaqiyatli o'tkazildi!");
+            });
+        }
+
+        // O'yinlarni yuklash
+        db.ref('matches').on('value', (snapshot) => {
+            const matchesList = document.getElementById('matchesList');
+            const adminMatches = document.getElementById('adminMatches');
+            matchesList.innerHTML = '';
+            adminMatches.innerHTML = '';
+
+            if (snapshot.exists()) {
+                const matches = snapshot.val();
+                matches.forEach((match, index) => {
+                    let p1Class = "", p2Class = "";
+                    if (match.status === 'completed') {
+                        if (match.score1 > match.score2) { p1Class = "winner"; p2Class = "loser"; }
+                        else if (match.score2 > match.score1) { p1Class = "loser"; p2Class = "winner"; }
+                    }
+
+                    matchesList.innerHTML += `
+                        <div class="match-card">
+                            <span><b class="${p1Class}">${match.p1}</b> vs <b class="${p2Class}">${match.p2}</b></span>
+                            <span>Hisob: <b>${match.score1} : ${match.score2}</b></span>
+                        </div>
+                    `;
+
+                    adminMatches.innerHTML += `
+                        <div class="match-card">
+                            <span>${match.p1} vs ${match.p2}</span>
+                            <div>
+                                <input type="number" id="s1_${index}" value="${match.score1}">
+                                :
+                                <input type="number" id="s2_${index}" value="${match.score2}">
+                                <button onclick="saveScore(${index})">Saqlash</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                matchesList.innerHTML = "Hozircha o'yinlar belgilanmagan.";
+            }
+        });
+
+        // Hisobni saqlash va mag'lubni elash
+        function saveScore(index) {
+            db.ref(`matches/${index}`).once('value', (snapshot) => {
+                const match = snapshot.val();
+                const s1 = parseInt(document.getElementById(`s1_${index}`).value);
+                const s2 = parseInt(document.getElementById(`s2_${index}`).value);
+
+                if (s1 === s2) {
+                    alert("Durang bo'lishi mumkin emas. Iltimos, g'olibni aniqlang!");
+                    return;
+                }
+
+                let loserId = s1 < s2 ? match.id1 : match.id2;
+                let winnerId = s1 > s2 ? match.id1 : match.id2;
+
+                db.ref(`matches/${index}`).update({
+                    score1: s1,
+                    score2: s2,
+                    status: 'completed'
+                });
+
+                if (loserId) {
+                    db.ref(`players/${loserId}`).update({ isEliminated: true });
+                }
+                if (winnerId) {
+                    db.ref(`players/${winnerId}`).update({ isEliminated: false });
+                }
+
+                alert("Hisob saqlandi! Mag'lub bo'lgan ishtirokchi elandi.");
+            });
+        }
+    </script>
+</body>
+
+</html>
