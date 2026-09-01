@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chempionat 1vs1</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        header {
+            background-color: #1e293b;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://via.placeholder.com/1200x400') center/cover;
+            color: white;
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .btn {
+            background-color: #0284c7;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 1rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-sm {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.85rem;
+            margin-top: 0;
+        }
+
+        .btn-success {
+            background-color: #16a34a;
+        }
+
+        .btn-danger {
+            background-color: #dc2626;
+        }
+
+        .btn:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            margin-bottom: 1rem;
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background-color: #f8fafc;
+        }
+
+        .match-pair {
+            background-color: #f1f5f9;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .match-teams {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 500;
+            align-items: center;
+        }
+
+        .match-score {
+            font-weight: bold;
+            color: #0284c7;
+            background: #e0f2fe;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .admin-controls {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+            border-top: 1px dashed #cbd5e1;
+            padding-top: 8px;
+        }
+
+        .admin-controls input {
+            width: 60px;
+            padding: 4px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: #64748b;
+            padding: 1rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: #0f172a;
+            color: white;
+            margin-top: 2rem;
+        }
+
+        footer a {
+            color: #38bdf8;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h2>CHAMPIONSHIP 1VS1</h2>
+        <button id="adminLoginBtn" style="background:none; border:none; color:white; cursor:pointer;">Admin
+            Kirish</button>
+    </header>
+
+    <section class="hero">
+        <h1>Milliy Chempionat 2026</h1>
+        <p>G'oliblik uchun kurashga qo'shiling!</p>
+        <button class="btn" id="openModalBtn">Ro'yxatdan o'tish</button>
+    </section>
+
+    <div class="container">
+        <div class="card">
+            <h2>Ishtirokchilar</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Ism</th>
+                        <th>Telegram</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <tr>
+                        <td colspan="3" class="empty-msg">Yuklanmoqda...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>1vs1 O'yinlar Juftligi</h2>
+            <button class="btn btn-success" id="drawBtn" style="width: 100%; margin-bottom: 15px; display: none;">Qur'a
+                tashlash (Admin)</button>
+            <div id="matchesContainer">
+                <div class="empty-msg">Juftliklar hali shakllanmadi.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 style="margin-bottom: 15px;">Ro'yxatdan o'tish</h2>
+            <form id="regForm">
+                <div class="form-group">
+                    <label>Ismingiz:</label>
+                    <input type="text" id="userName" required>
+                </div>
+                <div class="form-group">
+                    <label>Telegram Nickname:</label>
+                    <input type="text" id="userTelegram" placeholder="@username" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Yuborish</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>Admin: <a href="https://t.me/abdujabborov_707" target="_blank">@abdujabborov_707</a></p>
+        <p style="margin-top: 8px; font-size: 0.9rem; color: #94a3b8;">&copy; 2026 Chempionat Rasmiy Sayti.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            databaseURL: "https://chempionat-2026-default-rtdb.firebaseio.com/"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const playersRef = ref(db, 'players');
+        const matchesRef = ref(db, 'matches');
+
+        const modal = document.getElementById("registerModal");
+        const openModalBtn = document.getElementById("openModalBtn");
+        const closeBtn = document.getElementsByClassName("close-btn")[0];
+        const form = document.getElementById("regForm");
+        const tableBody = document.getElementById("userTableBody");
+        const drawBtn = document.getElementById("drawBtn");
+        const matchesContainer = document.getElementById("matchesContainer");
+        const adminLoginBtn = document.getElementById("adminLoginBtn");
+
+        const ADMIN_PASSWORD = "saidakbarrty";
+        let isAdmin = false;
+        let players = [];
+        let currentMatches = [];
+        let isUserRegistered = localStorage.getItem("is_registered") === "true";
+
+        if (isUserRegistered) {
+            openModalBtn.innerText = "Siz ro'yxatdan o'tgansiz";
+            openModalBtn.disabled = true;
+        }
+
+        onValue(playersRef, (snapshot) => {
+            const data = snapshot.val();
+            players = [];
+            tableBody.innerHTML = "";
+
+            if (data) {
+                let index = 1;
+                for (let id in data) {
+                    players.push(data[id]);
+                    const newRow = document.createElement("tr");
+                    newRow.innerHTML = `
+                        <td>${index++}</td>
+                        <td>${data[id].name}</td>
+                        <td>${data[id].telegram}</td>
+                    `;
+                    tableBody.appendChild(newRow);
+                }
+            } else {
+                tableBody.innerHTML = `<tr><td colspan="3" class="empty-msg">Hozircha ishtirokchilar yo'q</td></tr>`;
+            }
+        });
+
+        onValue(matchesRef, (snapshot) => {
+            const data = snapshot.val();
+            currentMatches = data || [];
+            renderMatches();
+        });
+
+        function renderMatches() {
+            if (currentMatches.length === 0) {
+                matchesContainer.innerHTML = '<div class="empty-msg">Juftliklar hali shakllanmadi.</div>';
+                return;
+            }
+
+            matchesContainer.innerHTML = "";
+            currentMatches.forEach((match, index) => {
+                const matchDiv = document.createElement("div");
+                matchDiv.className = "match-pair";
+
+                let scoreText = match.score ? `<span class="match-score">${match.score}</span>` : 'VS';
+                let winnerText = match.winner ? `<br><small style="color:green">G'olib: ${match.winner}</small>` : '';
+
+                if (match.p2) {
+                    matchDiv.innerHTML = `
+                        <div class="match-teams">
+                            <span>${match.p1.name}</span>
+                            ${scoreText}
+                            <span>${match.p2.name}</span>
+                        </div>
+                        ${winnerText}
+                    `;
+
+                    if (isAdmin && !match.winner) {
+                        const adminDiv = document.createElement("div");
+                        adminDiv.className = "admin-controls";
+                        adminDiv.innerHTML = `
+                            <input type="number" id="s1_${index}" placeholder="0">
+                            <span>:</span>
+                            <input type="number" id="s2_${index}" placeholder="0">
+                            <button class="btn btn-sm btn-success" onclick="saveScore(${index})">Hisobni saqlash</button>
+                        `;
+                        matchDiv.appendChild(adminDiv);
+                    }
+                } else {
+                    matchDiv.innerHTML = `
+                        <div class="match-teams">
+                            <span>${match.p1.name}</span>
+                            <span style="color: green;">(Avtomatik keyingi bosqichda)</span>
+                        </div>
+                    `;
+                }
+                matchesContainer.appendChild(matchDiv);
+            });
+        }
+
+        window.saveScore = function (index) {
+            const s1 = document.getElementById(`s1_${index}`).value;
+            const s2 = document.getElementById(`s2_${index}`).value;
+
+            if (s1 === "" || s2 === "") {
+                alert("Iltimos, har ikkala jamoa hisobini kiriting!");
+                return;
+            }
+
+            let winner = "";
+            if (parseInt(s1) > parseInt(s2)) {
+                winner = currentMatches[index].p1.name;
+            } else if (parseInt(s2) > parseInt(s1)) {
+                winner = currentMatches[index].p2.name;
+            } else {
+                alert("Durang bo'lishi mumkin emas. G'olibni aniqlang!");
+                return;
+            }
+
+            currentMatches[index].score = `${s1} : ${s2}`;
+            currentMatches[index].winner = winner;
+
+            set(matchesRef, currentMatches);
+        };
+
+        openModalBtn.onclick = () => { if (!isUserRegistered) modal.style.display = "block"; };
+        closeBtn.onclick = () => modal.style.display = "none";
+        window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
+
+        form.onsubmit = function (e) {
+            e.preventDefault();
+
+            if (isUserRegistered) return;
+
+            const name = document.getElementById("userName").value.trim();
+            let telegram = document.getElementById("userTelegram").value.trim();
+            if (!telegram.startsWith('@')) telegram = '@' + telegram;
+
+            push(playersRef, { name, telegram });
+
+            localStorage.setItem("is_registered", "true");
+            isUserRegistered = true;
+
+            alert("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
+            modal.style.display = "none";
+            form.reset();
+
+            openModalBtn.innerText = "Siz ro'yxatdan o'tgansiz";
+            openModalBtn.disabled = true;
+        };
+
+        adminLoginBtn.onclick = function () {
+            const pass = prompt("Admin parolini kiriting:");
+            if (pass === ADMIN_PASSWORD) {
+                isAdmin = true;
+                drawBtn.style.display = "block";
+                renderMatches();
+                alert("Admin rejimi yoqildi! Endi hisobni kiritishingiz mumkin.");
+            } else {
+                alert("Parol noto'g'ri!");
+            }
+        };
+
+        drawBtn.onclick = function () {
+            if (players.length < 2) {
+                alert("Qur'a tashlash uchun kamida 2 ta ishtirokchi kerak!");
+                return;
+            }
+
+            let shuffled = [...players];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+
+            let matches = [];
+            for (let i = 0; i < shuffled.length; i += 2) {
+                if (i + 1 < shuffled.length) {
+                    matches.push({ p1: shuffled[i], p2: shuffled[i + 1], score: null, winner: null });
+                } else {
+                    matches.push({ p1: shuffled[i], p2: null, score: null, winner: shuffled[i].name });
+                }
+            }
+
+            set(matchesRef, matches);
+        };
+    </script>
+</body>
+
+</html>
