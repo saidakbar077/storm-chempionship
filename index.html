@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eFootball 1vs1 Championship</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #111827;
+            --accent-blue: #38bdf8;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #1f2937;
+            --chat-bg: #1f2937;
+        }
+
+        /* Qorong'u (Oled Dark) Rejim uchun o'zgaruvchilar */
+        [data-theme="darker"] {
+            --bg-color: #000000;
+            --card-bg: #0a0a0a;
+            --accent-blue: #00d2ff;
+            --border-color: #222222;
+            --chat-bg: #121212;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 30px;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            letter-spacing: 1px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .theme-toggle-btn {
+            background: var(--chat-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(56, 189, 248, 0.2));
+            text-align: center;
+            padding: 3rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 25px auto;
+            padding: 0 15px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            color: var(--accent-blue);
+            font-size: 1.4rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            background: var(--chat-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        button {
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-refresh {
+            background: #059669;
+        }
+
+        .btn-delete {
+            background: var(--accent-red);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+
+        .btn-edit {
+            background: #f59e0b;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        .btn-settings {
+            background: #8b5cf6;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--chat-bg);
+            color: var(--accent-blue);
+        }
+
+        .deadline-badge {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .match-card {
+            background: var(--chat-bg);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tg-link {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .tg-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Qadab qo'yilgan xabar uslubi */
+        .pinned-box {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--accent-blue);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .pinned-box b {
+            color: var(--accent-blue);
+        }
+
+        /* Chat UI */
+        .chat-box {
+            height: 280px;
+            overflow-y: auto;
+            background: var(--chat-bg);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .chat-msg {
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            word-break: break-word;
+            padding: 8px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .chat-msg-content {
+            flex: 1;
+        }
+
+        .chat-msg b {
+            color: var(--accent-blue);
+        }
+
+        .chat-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-left: 8px;
+        }
+
+        .chat-img {
+            max-width: 220px;
+            max-height: 180px;
+            border-radius: 8px;
+            margin-top: 5px;
+            display: block;
+            border: 1px solid var(--border-color);
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+
+        .chat-btn-action {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .chat-btn-action:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .file-upload-btn {
+            background: var(--chat-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+
+        .file-upload-btn:hover {
+            background: #374151;
+        }
+
+        .chat-user-badge {
+            font-size: 0.85rem;
+            color: var(--accent-green);
+            margin-bottom: 8px;
+            display: block;
+            cursor: pointer;
+        }
+
+        /* Modal Settings */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--accent-blue);
+            width: 90%;
+            max-width: 500px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .settings-list p {
+            margin-bottom: 10px;
+            font-size: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        footer {
+            background-color: var(--bg-color);
+            color: var(--text-muted);
+            text-align: center;
+            padding: 25px 10px;
+            margin-top: 50px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-admin-btn {
+            display: inline-block;
+            margin-top: 10px;
+            background-color: var(--accent-blue);
+            color: #000;
+            padding: 8px 18px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">🎮 eFootball 1vs1 Championship</div>
+        <div class="header-actions">
+            <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn">🌙 Tungi Rejim</button>
+            <button onclick="toggleAdmin()" id="adminBtn">Admin Kirish</button>
+        </div>
+    </header>
+
+    <div class="hero">
+        <h1>eFootball 1vs1 Championship 2026</h1>
+        <p>Eng kuchli g'olibni aniqlash va chempion bo'lish imkoniyati!</p>
+    </div>
+
+    <div class="container">
+        <!-- Ro'yxatdan o'tish card -->
+        <div class="card" id="registerCard">
+            <h2>Ishtirok etish</h2>
+            <span style="color: var(--accent-blue); font-weight: bold; margin-bottom: 10px; display:block;"
+                id="playerCountInfo">Ishtirokchilar: 0 / 32</span>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Ismingiz:</label>
+                    <input type="text" id="playerName" required placeholder="Masalan: Bekzod">
+                </div>
+                <div class="form-group">
+                    <label>Telegram Username:</label>
+                    <input type="text" id="telegramHandle" required placeholder="@username">
+                </div>
+                <button type="submit">Ro'yxatdan o'tish</button>
+            </form>
+        </div>
+
+        <!-- Ishtirokchilar -->
+        <div class="card">
+            <h2>Ishtirokchilar Ro'yxati</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Ism</th>
+                        <th>Telegram</th>
+                        <th>Amallar</th>
+                    </tr>
+                </thead>
+                <tbody id="playersList">
+                    <tr>
+                        <td colspan="4">Yuklanmoqda...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Admin Paneli -->
+        <div class="card" id="adminPanel" style="display: none; border-color: #f59e0b;">
+            <h2 style="color: #f59e0b;">⚙️ Admin Paneli</h2>
+            <br>
+            <button onclick="drawMatches()">🎲 Qur'a Tashlash (30 Soat Deadline bilan)</button>
+            <div id="adminMatches" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- O'yinlar va Match Settings -->
+        <div class="card">
+            <div class="card-header">
+                <h2>O'yinlar Jadvali</h2>
+                <button class="btn-refresh" onclick="refreshMatches()">🔄 Yangilash</button>
+            </div>
+
+            <div id="deadlineDisplay" class="deadline-badge" style="display: none;"></div>
+
+            <div id="matchesList">Hozircha o'yinlar belgilanmagan.</div>
+
+            <button class="btn-settings" onclick="openSettingsModal()">⚙️ Match Settings</button>
+        </div>
+
+        <!-- Onlayn Chat -->
+        <div class="card">
+            <h2>💬 Ishtirokchilar Chati</h2>
+
+            <!-- Foydalanuvchi ismi va o'zgartirish opsiyasi -->
+            <span class="chat-user-badge" id="chatUserDisplay" onclick="changeChatName()">👤 Chatdagi ismingiz: <b
+                    id="chatNameVal">Kiritilmagan</b> ✏️ (o'zgartirish)</span>
+
+            <!-- Qadab qo'yilgan xabar -->
+            <div class="pinned-box" id="pinnedBox">
+                <div>
+                    📌 <b>Qadab qo'yilgan xabar:</b>
+                    <span id="pinnedText" style="margin-left: 5px;">-</span>
+                </div>
+                <button id="unpinBtn" onclick="unpinMessage()"
+                    style="display:none; background:none; color:var(--accent-red); font-size:1.1rem; padding:0;">✖</button>
+            </div>
+
+            <div class="chat-box" id="chatBox"></div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="chatInput" placeholder="Xabaringizni yozing..."
+                    style="flex: 1; min-width: 180px;">
+                <label class="file-upload-btn">
+                    📷 Rasm
+                    <input type="file" id="chatFileInput" accept="image/*" style="display: none;"
+                        onchange="handleFileSelect(event)">
+                </label>
+                <button onclick="sendMessage()">Yuborish</button>
+            </div>
+            <span id="fileNameDisplay"
+                style="font-size: 0.8rem; color: var(--accent-blue); margin-top: 5px; display: block;"></span>
+        </div>
+    </div>
+
+    <!-- Match Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="color: var(--accent-blue);">⚙️ Match Settings</h3>
+                <button onclick="closeSettingsModal()" style="background: #374151;">⬅️ Ortga qaytish</button>
+            </div>
+            <div class="settings-list">
+                <p>🎮 <b>Match Type:</b> Standard</p>
+                <p>⏱️ <b>Match Time:</b> 9 min.</p>
+                <p>🤕 <b>Injuries:</b> Off ❌</p>
+                <p>⏳ <b>Extra Time:</b> On ✅</p>
+                <p>🎯 <b>Penalties:</b> On ✅</p>
+                <p>🔄 <b>No. of Substitutions:</b> 6</p>
+                <p>♻️ <b>No. of Sub. Intervals:</b> 6</p>
+                <p>➕⏳ <b>+1 Sub in Extra Time:</b> On ✅</p>
+                <p>🏠 <b>Condition (Home):</b> Excellent ⭐⭐⭐⭐⭐</p>
+                <p>✈️ <b>Condition (Away):</b> Excellent ⭐⭐⭐⭐⭐</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 eFootball 1vs1 Championship. Barcha huquqlar himoyalangan.</p>
+        <a href="https://t.me/abdujabborov_707" target="_blank" class="footer-admin-btn">💬 Admin: @abdujabborov_707</a>
+    </footer>
+
+    <script>
+        const firebaseConfig = {
+            databaseURL: "https://storm-chempionship-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let isAdmin = false;
+        const MAX_PLAYERS = 32;
+        let selectedBase64Image = "";
+
+        const BANNED_WORDS = ['sik', 'jalap', 'am', 'qotoq', 'skay', 'haromi', 'jallap', 'chort', 'porn', 'nsfw', 'sex', 'adult', '18+'];
+
+        function filterText(text) {
+            let filtered = text;
+            BANNED_WORDS.forEach(word => {
+                const regex = new RegExp(word, 'gi');
+                filtered = filtered.replace(regex, '***');
+            });
+            return filtered;
+        }
+
+        // --- Chat Ismini Boshqarish va Eslab Qolish ---
+        function getSavedChatName() {
+            let name = localStorage.getItem('chat_user_name');
+            if (!name) {
+                name = prompt("Chatda muloqot qilish uchun ismingizni kiriting:");
+                if (name && name.trim() !== "") {
+                    name = filterText(name.trim());
+                    localStorage.setItem('chat_user_name', name);
+                } else {
+                    name = "Mehmon_" + Math.floor(Math.random() * 1000);
+                    localStorage.setItem('chat_user_name', name);
+                }
+            }
+            return name;
+        }
+
+        function updateChatNameBadge() {
+            const currentName = localStorage.getItem('chat_user_name') || "Kiritilmagan";
+            document.getElementById('chatNameVal').innerText = currentName;
+        }
+
+        function changeChatName() {
+            const currentName = localStorage.getItem('chat_user_name') || "";
+            const newName = prompt("Yangi chat ismingizni kiriting:", currentName);
+            if (newName && newName.trim() !== "") {
+                const cleanName = filterText(newName.trim());
+                localStorage.setItem('chat_user_name', cleanName);
+                updateChatNameBadge();
+                alert("Chatdagi ismingiz o'zgartirildi!");
+            }
+        }
+
+        // Sahifa yuklanganda ismni ko'rsatish
+        updateChatNameBadge();
+
+        // Rejimni o'zgartirish (Theme Toggle)
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeBtn');
+            if (body.getAttribute('data-theme') === 'darker') {
+                body.removeAttribute('data-theme');
+                btn.innerText = "🌙 Tungi Rejim";
+                localStorage.setItem('theme', 'default');
+            } else {
+                body.setAttribute('data-theme', 'darker');
+                btn.innerText = "☀️ Qorong'u Rejim";
+                localStorage.setItem('theme', 'darker');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'darker') {
+            document.body.setAttribute('data-theme', 'darker');
+            document.getElementById('themeBtn').innerText = "☀️ Qorong'u Rejim";
+        }
+
+        function getDeviceId() {
+            const navigatorInfo = navigator.userAgent + navigator.language + screen.width + "x" + screen.height;
+            let hash = 0;
+            for (let i = 0; i < navigatorInfo.length; i++) {
+                hash = (hash << 5) - hash + navigatorInfo.charCodeAt(i);
+                hash |= 0;
+            }
+            return "dev_" + Math.abs(hash);
+        }
+        const deviceId = getDeviceId();
+
+        if (localStorage.getItem('storm_admin_logged') === 'true') {
+            isAdmin = true;
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('adminBtn').innerText = "Admin Chiqish";
+            document.getElementById('unpinBtn').style.display = 'inline-block';
+        }
+
+        // Ro'yxatdan o'tish
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const name = document.getElementById('playerName').value.trim();
+            let tg = document.getElementById('telegramHandle').value.trim();
+            if (!tg.startsWith('@')) tg = '@' + tg;
+
+            db.ref('players').once('value', (snapshot) => {
+                let count = snapshot.exists() ? snapshot.numChildren() : 0;
+                if (count >= MAX_PLAYERS) return alert("Ro'yxat yopilgan!");
+
+                let exists = false;
+                if (snapshot.exists()) {
+                    snapshot.forEach(c => {
+                        if (c.val().deviceId === deviceId) exists = true;
+                    });
+                }
+                if (exists) return alert("Ushbu qurilmadan ro'yxatdan o'tiboq bo'lingan!");
+
+                const cleanName = filterText(name);
+                const newRef = db.ref('players').push();
+                newRef.set({
+                    name: cleanName,
+                    telegram: tg,
+                    deviceId: deviceId,
+                    isEliminated: false
+                }, () => {
+                    // Ro'yxatdan o'tgan ismni avtomatik chat ismi sifatida ham saqlash
+                    localStorage.setItem('chat_user_name', cleanName);
+                    updateChatNameBadge();
+                    alert("Ro'yxatdan o'tdingiz!");
+                    document.getElementById('registerForm').reset();
+                });
+            });
+        });
+
+        // Ishtirokchilar ro'yxati
+        db.ref('players').on('value', (snapshot) => {
+            const list = document.getElementById('playersList');
+            const countInfo = document.getElementById('playerCountInfo');
+            list.innerHTML = '';
+
+            let count = snapshot.exists() ? snapshot.numChildren() : 0;
+            countInfo.innerText = `Ishtirokchilar: ${count} / ${MAX_PLAYERS}`;
+
+            let num = 1;
+            if (snapshot.exists()) {
+                snapshot.forEach((child) => {
+                    const key = child.key;
+                    const p = child.val();
+                    const isOwner = p.deviceId === deviceId;
+
+                    let actionBtns = '';
+                    if (isOwner) {
+                        actionBtns += `<button class="btn-edit" onclick="editMyProfile('${key}', '${p.name}')">✏️ Tahrirlash</button>`;
+                    }
+                    if (isAdmin) {
+                        actionBtns += `<button class="btn-delete" onclick="deletePlayer('${key}')">O'chirish</button>`;
+                    }
+
+                    list.innerHTML += `
+                        <tr>
+                            <td>${num++}</td>
+                            <td><b>${p.name}</b> ${p.isEliminated ? '<span style="color:red">(Chiqdi)</span>' : ''}</td>
+                            <td><a href="https://t.me/${p.telegram.replace('@', '')}" target="_blank" class="tg-link">${p.telegram}</a></td>
+                            <td>${actionBtns}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                list.innerHTML = '<tr><td colspan="4">Ishtirokchilar hozircha mavjud emas</td></tr>';
+            }
+        });
+
+        function editMyProfile(key, oldName) {
+            const newName = prompt("Yangi ismingizni kiriting:", oldName);
+            if (newName) {
+                const cleanName = filterText(newName);
+                db.ref(`players/${key}`).update({
+                    name: cleanName
+                }, () => {
+                    localStorage.setItem('chat_user_name', cleanName);
+                    updateChatNameBadge();
+                    alert("Ismingiz yangilandi!");
+                });
+            }
+        }
+
+        // Qur'a tashlash
+        function drawMatches() {
+            db.ref('players').once('value', (snapshot) => {
+                const active = [];
+                snapshot.forEach((child) => {
+                    if (!child.val().isEliminated) active.push({ id: child.key, ...child.val() });
+                });
+
+                if (active.length < 2) return alert("Kamida 2 ta faol ishtirokchi kerak!");
+
+                active.sort(() => Math.random() - 0.5);
+                const matches = [];
+
+                for (let i = 0; i < active.length; i += 2) {
+                    if (active[i + 1]) {
+                        matches.push({
+                            p1_name: active[i].name,
+                            p1_tg: active[i].telegram,
+                            p2_name: active[i + 1].name,
+                            p2_tg: active[i + 1].telegram,
+                            score1: 0, score2: 0, status: 'pending'
+                        });
+                    }
+                }
+
+                const deadlineTime = new Date(Date.now() + 30 * 60 * 60 * 1000).toLocaleString('uz-UZ');
+
+                db.ref('matches').set(matches);
+                db.ref('deadline').set(deadlineTime);
+                alert("Qur'a o'tkazildi va 30 soatlik deadline belgilandi!");
+            });
+        }
+
+        db.ref('deadline').on('value', (snap) => {
+            const badge = document.getElementById('deadlineDisplay');
+            if (snap.exists()) {
+                badge.style.display = 'block';
+                badge.innerHTML = `⏱️ O'yinlarni o'tkazish muddati (Deadline): <b>${snap.val()}</b>`;
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+
+        function refreshMatches() {
+            db.ref('matches').once('value', () => {
+                alert("O'yinlar ro'yxati yangilandi!");
+            });
+        }
+
+        // O'yinlar Jadvali
+        db.ref('matches').on('value', (snapshot) => {
+            const matchesList = document.getElementById('matchesList');
+            const adminMatches = document.getElementById('adminMatches');
+            matchesList.innerHTML = '';
+            adminMatches.innerHTML = '';
+
+            if (snapshot.exists()) {
+                snapshot.forEach((child) => {
+                    const k = child.key;
+                    const m = child.val();
+
+                    const p1_link = `<a href="https://t.me/${m.p1_tg.replace('@', '')}" target="_blank" class="tg-link">(${m.p1_tg})</a>`;
+                    const p2_link = `<a href="https://t.me/${m.p2_tg.replace('@', '')}" target="_blank" class="tg-link">(${m.p2_tg})</a>`;
+
+                    matchesList.innerHTML += `
+                        <div class="match-card">
+                            <span><b>${m.p1_name}</b> ${p1_link} <b style="color:var(--accent-blue)">vs</b> <b>${m.p2_name}</b> ${p2_link}</span>
+                            <span>Hisob: <b>${m.score1} : ${m.score2}</b></span>
+                        </div>
+                    `;
+                    adminMatches.innerHTML += `
+                        <div class="match-card">
+                            <span>${m.p1_name} vs ${m.p2_name}</span>
+                            <div>
+                                <input type="number" id="s1_${k}" value="${m.score1}" style="width:50px;">
+                                :
+                                <input type="number" id="s2_${k}" value="${m.score2}" style="width:50px;">
+                                <button onclick="saveScore('${k}')">Saqlash</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                matchesList.innerHTML = "O'yinlar belgilanmagan.";
+            }
+        });
+
+        function saveScore(k) {
+            const s1 = parseInt(document.getElementById(`s1_${k}`).value);
+            const s2 = parseInt(document.getElementById(`s2_${k}`).value);
+            db.ref(`matches/${k}`).update({ score1: s1, score2: s2, status: 'completed' });
+            alert("Hisob saqlandi!");
+        }
+
+        function deletePlayer(key) {
+            if (confirm("Ushbu ishtirokchini o'chirishni tasdiqlaysizmi?")) {
+                db.ref(`players/${key}`).remove();
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 2 * 1024 * 1024) {
+                alert("Rasm hajmi juda katta! 2MB dan kichik rasm tanlang.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                selectedBase64Image = evt.target.result;
+                document.getElementById('fileNameDisplay').innerText = "Tanlangan rasm: " + file.name;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Onlayn Chatda Foydalanuvchi Ismi Bilan Yuborish
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+
+            if (!text && !selectedBase64Image) return;
+
+            // Xotiradan kiritilgan ismni olish
+            const senderName = getSavedChatName();
+            const cleanText = filterText(text);
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            db.ref('chat').push().set({
+                sender: senderName,
+                text: cleanText,
+                img: selectedBase64Image,
+                time: time
+            });
+
+            input.value = '';
+            selectedBase64Image = "";
+            document.getElementById('chatFileInput').value = "";
+            document.getElementById('fileNameDisplay').innerText = "";
+        }
+
+        // Realtime Chat va Admin Controls
+        db.ref('chat').on('value', (snapshot) => {
+            const box = document.getElementById('chatBox');
+            box.innerHTML = '';
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    const key = child.key;
+                    const msg = child.val();
+                    let imgHtml = msg.img ? `<br><img src="${msg.img}" class="chat-img" alt="Rasm">` : '';
+
+                    let adminControls = '';
+                    if (isAdmin) {
+                        adminControls = `
+                            <div class="chat-actions">
+                                <button class="chat-btn-action" title="Qadab qo'yish" onclick="pinMessage('${key}')">📌</button>
+                                <button class="chat-btn-action" title="O'chirish" onclick="deleteChatMessage('${key}')">🗑️</button>
+                            </div>
+                        `;
+                    }
+
+                    box.innerHTML += `
+                        <div class="chat-msg">
+                            <div class="chat-msg-content">
+                                <b>${msg.sender}:</b> ${msg.text} ${imgHtml} <span class="chat-time">${msg.time}</span>
+                            </div>
+                            ${adminControls}
+                        </div>
+                    `;
+                });
+                box.scrollTop = box.scrollHeight;
+            } else {
+                box.innerHTML = '<div style="color:var(--text-muted); text-align:center;">Hozircha xabarlar yo\'q</div>';
+            }
+        });
+
+        function deleteChatMessage(key) {
+            if (confirm("Ushbu xabarni o'chirishni xohlaysizmi?")) {
+                db.ref(`chat/${key}`).remove();
+            }
+        }
+
+        function pinMessage(key) {
+            db.ref(`chat/${key}`).once('value', (snap) => {
+                if (snap.exists()) {
+                    const msg = snap.val();
+                    const textToPin = `${msg.sender}: ${msg.text || '📷 [Rasm]'}`;
+                    db.ref('pinnedMessage').set(textToPin);
+                    alert("Xabar qadab qo'yildi!");
+                }
+            });
+        }
+
+        function unpinMessage() {
+            if (confirm("Qadab qo'yilgan xabarni olib tashlaysizmi?")) {
+                db.ref('pinnedMessage').remove();
+            }
+        }
+
+        db.ref('pinnedMessage').on('value', (snap) => {
+            const box = document.getElementById('pinnedBox');
+            const textSpan = document.getElementById('pinnedText');
+            if (snap.exists() && snap.val()) {
+                box.style.display = 'flex';
+                textSpan.innerText = snap.val();
+            } else {
+                box.style.display = 'none';
+            }
+        });
+
+        function openSettingsModal() { document.getElementById('settingsModal').style.display = 'flex'; }
+        function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
+
+        function toggleAdmin() {
+            if (!isAdmin) {
+                if (prompt("Admin paroli:") === "saidakbarrty") {
+                    isAdmin = true;
+                    localStorage.setItem('storm_admin_logged', 'true');
+                    location.reload();
+                }
+            } else {
+                isAdmin = false;
+                localStorage.removeItem('storm_admin_logged');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+
+</html>
